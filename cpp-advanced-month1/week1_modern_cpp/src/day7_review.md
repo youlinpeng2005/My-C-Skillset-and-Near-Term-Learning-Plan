@@ -4,12 +4,12 @@
 
 完成后在 [ ] 中打 x
 
-- [ ] Day1: 实现了 MySharedPtr，理解引用计数机制
-- [ ] Day2: 用 RAII 封装了 fd，改写了连接管理
-- [ ] Day3: 理解了 move 语义，实现了 Buffer 类
-- [ ] Day4: 实现了 EventHandler 回调注册器
-- [ ] Day5: 手写了 LRU 缓存并通过测试
-- [ ] Day6: 实现了 BlockingQueue<T>，生产者消费者测试通过
+- [x ] Day1: 实现了 MySharedPtr，理解引用计数机制
+- [x ] Day2: 用 RAII 封装了 fd，改写了连接管理
+- [ x] Day3: 理解了 move 语义，实现了 Buffer 类
+- [x ] Day4: 实现了 EventHandler 回调注册器
+- [ x] Day5: 手写了 LRU 缓存并通过测试
+- [ x] Day6: 实现了 BlockingQueue<T>，生产者消费者测试通过
 
 ---
 

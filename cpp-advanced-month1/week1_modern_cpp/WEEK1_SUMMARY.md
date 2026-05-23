@@ -24,7 +24,62 @@ Day7  复盘自测
 | `shared_ptr` | 引用计数共享所有权 | 多对象共享同一资源 |
 | `weak_ptr` | 弱引用，不影响计数 | 打破循环引用（如观察者模式） |
 
-**手写要点**：`MySharedPtr` = 控制块（引用计数 atomic）+ 裸指针，拷贝 `++count`，析构 `--count == 0` 时 `delete`。
+**手写 `MySharedPtr<T>`**：
+
+```cpp
+template <typename T>
+class MySharedPtr {
+public:
+    explicit MySharedPtr(T* ptr = nullptr)
+        : ptr_(ptr), ref_count_(ptr ? new int(1) : nullptr) {}
+
+    // 拷贝构造：共享引用计数并 +1
+    MySharedPtr(const MySharedPtr& other)
+        : ptr_(other.ptr_), ref_count_(other.ref_count_) {
+        if (ref_count_) ++(*ref_count_);
+    }
+
+    // 移动构造：接管资源，原指针置空
+    MySharedPtr(MySharedPtr&& other) noexcept
+        : ptr_(other.ptr_), ref_count_(other.ref_count_) {
+        other.ptr_ = nullptr;
+        other.ref_count_ = nullptr;
+    }
+
+    ~MySharedPtr() { release(); }
+
+    MySharedPtr& operator=(const MySharedPtr& other) {
+        if (this != &other) {
+            release();
+            ptr_ = other.ptr_;
+            ref_count_ = other.ref_count_;
+            if (ref_count_) ++(*ref_count_);
+        }
+        return *this;
+    }
+
+    T& operator*()  const { return *ptr_; }
+    T* operator->() const { return ptr_; }
+    T* get()        const { return ptr_; }
+    int use_count() const { return ref_count_ ? *ref_count_ : 0; }
+    explicit operator bool() const { return ptr_ != nullptr; }
+
+private:
+    void release() {
+        if (ref_count_ && --(*ref_count_) == 0) {
+            delete ptr_;
+            delete ref_count_;
+        }
+        ptr_ = nullptr;
+        ref_count_ = nullptr;
+    }
+
+    T*   ptr_;
+    int* ref_count_; // 真实实现用 atomic<int>，此处简化
+};
+```
+
+> **关键点**：真实 `shared_ptr` 的 `ref_count_` 存在独立的 **control block** 里，使用 `atomic<int>` 保证引用计数的线程安全；`weak_ptr` 共享同一 control block 但只持有弱引用计数，`lock()` 时原子检查强引用计数是否 > 0。
 
 ---
 
@@ -44,8 +99,34 @@ auto fd = std::make_unique<FileDescriptor>(open(...));
 ### Day3 — move 语义 + 右值引用
 - `std::move` 本身**不移动**，只做类型转换（`T&` → `T&&`）。
 - move 后原对象处于"**有效但未指定**"状态，不应再使用其值。
-- 实现了 `Buffer` 类（移动构造/移动赋值），避免大对象深拷贝。
 - **加 `noexcept`**：`vector` 扩容时才会选择移动而非拷贝，性能关键。
+
+**拷贝 vs 移动对比（手写 `BigData`）**：
+
+```cpp
+class BigData {
+public:
+    explicit BigData(size_t size) : size_(size), data_(new int[size]) {}
+
+    // 拷贝构造：深拷贝，重新分配内存（慢）
+    BigData(const BigData& other) : size_(other.size_), data_(new int[other.size_]) {
+        std::copy(other.data_, other.data_ + other.size_, data_);
+    }
+
+    // 移动构造：直接"偷走"指针，不分配内存（快）
+    BigData(BigData&& other) noexcept
+        : size_(other.size_), data_(other.data_) {
+        other.data_ = nullptr;  // 原对象放弃所有权
+        other.size_ = 0;
+    }
+
+    ~BigData() { delete[] data_; }
+
+private:
+    size_t size_;
+    int*   data_;
+};
+```
 
 ---
 
@@ -63,17 +144,60 @@ handler = [this](int fd) { onReadable(fd); };
 ---
 
 ### Day5 — STL 高级用法 + 手写 LRU 缓存
+
 **迭代器失效规则**（必考）：
 - `vector`：中间插入/删除 → 后续迭代器全部失效；扩容 → 全部失效
 - `list`：插入/删除不影响其他迭代器
 - `unordered_map`：插入可能 rehash → 全部迭代器失效
 
-**LRU 缓存实现**（O(1) get/put）：
+**手写 `LRUCache<K, V>`**（O(1) get/put）：
+
 ```
-双向链表：维护访问顺序（头部最新，尾部最旧）
-unordered_map：key → list迭代器，O(1) 定位
-put时：若已存在 → 移到链表头；若满 → 删除链表尾 + map条目
+数据结构：list<pair<K,V>>（维护访问顺序）+ unordered_map<K, list::iterator>（O(1)定位）
+get：找到节点 → splice 移到链表头 → 返回值
+put：已存在 → 更新值 + splice 到头；不存在且满 → 删除链表尾+map条目 → 插入头部
 ```
+
+```cpp
+template <typename K, typename V>
+class LRUCache {
+public:
+    explicit LRUCache(int capacity) : capacity_(capacity) {}
+
+    V get(const K& key) {
+        auto it = map_.find(key);
+        if (it == map_.end()) throw std::out_of_range("key not found");
+        // 访问了，移到链表头（最近使用）
+        list_.splice(list_.begin(), list_, it->second);
+        return it->second->second;
+    }
+
+    void put(const K& key, const V& value) {
+        auto it = map_.find(key);
+        if (it != map_.end()) {
+            it->second->second = value;
+            list_.splice(list_.begin(), list_, it->second);
+            return;
+        }
+        if ((int)list_.size() >= capacity_) {
+            // 淘汰链表尾（最久未使用）
+            map_.erase(list_.back().first);
+            list_.pop_back();
+        }
+        list_.emplace_front(key, value);
+        map_[key] = list_.begin();
+    }
+
+    bool contains(const K& key) const { return map_.count(key) > 0; }
+
+private:
+    int capacity_;
+    std::list<std::pair<K, V>> list_;
+    std::unordered_map<K, typename std::list<std::pair<K, V>>::iterator> map_;
+};
+```
+
+> **为什么用 `list` 而非 `vector`**：LRU 需要频繁"中间删除 + 头部插入"，`list` 节点操作 O(1)，`vector` 中间删除 O(n)。`list::splice` 只改指针，不拷贝数据，复杂度 O(1)。
 
 ---
 

@@ -182,6 +182,36 @@ void demo_chat_server() {
 // Q3: 什么情况下 RAII 对象的析构函数不会被调用？（提示：exit()、abort()、signal）
 // ============================================================
 
+//A1:
+//	因为FileDescriptor同时只能有一个指针访问该资源，如果允许拷贝，则会导致多个指针访问该资源，从而导致资源安全问题（double close未提到），共享考虑封装shared_ptr<FileDescriptor>
+//A2:lock_guard构建时加锁，析构时加锁，不能手动加锁，而unique_lock可随程序员手动加锁解锁，自由度高
+//A3:1. 基类未设置虚析构，而调用基类析构函数导致资源安全问题，2.程序未正常退出如任务管理器手动关闭程序
+
+//参考答案
+//A1:
+// 禁止拷贝的核心原因是防止【双重关闭（double close）】：
+// 若允许拷贝，两个 FileDescriptor 对象持有同一个 fd，析构时各自 close() 一次，
+// 第二次 close 会操作一个已被内核重新分配给其他文件的 fd，造成严重 bug。
+// 若需要共享 fd，应使用 shared_ptr<FileDescriptor>，
+// 由引用计数管理生命周期，只有最后一个持有者析构时才真正 close。
+
+//A2:
+// lock_guard：构造时加锁，析构时解锁，不支持手动控制，开销极小，优先使用。
+// unique_lock：同样构造加锁/析构解锁，但额外支持：
+//   1. 延迟加锁（std::defer_lock）
+//   2. 手动 lock() / unlock()
+//   3. 配合条件变量使用（condition_variable::wait() 只接受 unique_lock）
+//   4. 所有权可移动转移
+// 代价：内部多一个 bool 标记是否持有锁，略有额外开销。
+// 实践原则：简单临界区用 lock_guard，需要条件变量或分段加锁用 unique_lock。
+
+//A3:
+// 以下情况 RAII 对象的析构函数不会被调用：
+//   1. 调用 std::exit() 或 std::abort()：直接终止进程，栈上局部对象不析构
+//   2. 收到 SIGKILL 信号（kill -9）：内核强制终止，析构函数无法执行
+//   3. std::terminate() 被调用（如异常传播到 noexcept 函数外）
+//   4. 基类未声明虚析构函数，通过基类指针 delete 派生类对象时，
+//      派生类析构函数不会被调用（调用了错误的析构函数）
 int main() {
     demo_fd_raii();
     thread_safe_operation();
