@@ -1,11 +1,11 @@
 ---
 month: 2
 week: 1
-current_day: 2
-last_completed_day: 1
+current_day: 3
+last_completed_day: 2
 last_update: 2026-05-25
 status: in_progress
-next_task: "Day2 — 索引原理 + B+ 树 + 给 users/messages 表加索引"
+next_task: "Day3 — 往 messages 插 10w 假数据 + EXPLAIN 实战"
 plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 ---
 
@@ -25,9 +25,9 @@ plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 |---|---|
 | 当前月份 | **month2**（MySQL + Redis + chat_server 重构） |
 | 当前周 | **Week1 — MySQL 工程化**（5/25 ~ 5/31） |
-| 当前 day | **Day2**（2026/05/26 周二） |
-| 上次完成的 day | Day1（2026/05/25，commit c35358a） |
-| 下一个待办 | Day2 — 索引原理 + B+ 树 + 给 users/messages 表加索引 |
+| 当前 day | **Day3**（2026/05/27 周三） |
+| 上次完成的 day | Day2（2026/05/25，commit 4446a23） |
+| 下一个待办 | Day3 — 往 messages 插 10w 假数据 + EXPLAIN 实战 |
 | 详细任务卡 | [`cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md`](cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md) |
 | 当前阻塞 | 无 |
 
@@ -38,7 +38,7 @@ plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 | 月 | 时间 | 主题 | 状态 |
 |---|---|---|---|
 | month1 | 4/19 ~ 5/23 | 现代C++ + epoll + 并发 + 工程级聊天服务器 | ✅ 已完成（实际 5/23 收官，比计划晚 5 天） |
-| month2 | 5/25 ~ 6/21 | MySQL + Redis + chat_server v2 重构 | 🔥 进行中（Day1） |
+| month2 | 5/25 ~ 6/21 | MySQL + Redis + chat_server v2 重构 | 🔥 进行中（Day2） |
 | month3 | 6/22 ~ 7/19 | 完整 IM 系统（分布式 / 高级特性） | ⏳ 待规划 |
 
 ---
@@ -47,7 +47,7 @@ plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 
 | 周 | 时间 | 主题 | 完成 day | 状态 |
 |---|---|---|---|---|
-| Week1 | 5/25 ~ 5/31 | MySQL 工程化 + 连接池 | 1 / 7 | 🔥 进行中 |
+| Week1 | 5/25 ~ 5/31 | MySQL 工程化 + 连接池 | 2 / 7 | 🔥 进行中 |
 | Week2 | 6/01 ~ 6/07 | Redis 入门 + hiredis 封装 | 0 / 7 | ⏳ 待开始 |
 | Week3 | 6/08 ~ 6/14 | chat_server 重构 + 登录注册 | 0 / 7 | ⏳ 待开始 |
 | Week4 | 6/15 ~ 6/21 | 完整集成 + 日志增强 + 压测 | 0 / 7 | ⏳ 待开始 |
@@ -58,6 +58,7 @@ plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 
 > 倒序排列，最新的在最上面。每条格式：`YYYY-MM-DD | 标签 | 简述 | commit hash`
 
+- 2026-05-25 | day2 | 索引原理 + B+树 + 聚簇/非聚簇索引笔记 | 4446a23
 - 2026-05-25 | day1 | chat_db 建库建表 3 张，schema 设计说明 | c35358a
 
 ---
