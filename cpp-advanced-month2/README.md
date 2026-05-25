@@ -144,13 +144,13 @@ epoll + 线程池                  →   epoll + 线程池（保留）
 
 > **5/24（周日）**必须搞定，否则 day1 卡环境：
 
-- [ ] WSL2 Ubuntu 22.04 安装 MySQL 8.0：`sudo apt install mysql-server`
-- [ ] 启动 MySQL：`sudo service mysql start`；设置 root 密码；建一个练习用的库 `chat_db`
-- [ ] 安装 MySQL C++ 客户端开发包：`sudo apt install libmysqlclient-dev`（或 mariadb-connector）
-- [ ] 安装 Redis：`sudo apt install redis-server`；`redis-cli ping` 返回 PONG
-- [ ] 安装 hiredis：`sudo apt install libhiredis-dev`
+- [X ] WSL2 Ubuntu 22.04 安装 MySQL 8.0：`sudo apt install mysql-server`
+- [ X] 启动 MySQL：`sudo service mysql start`；设置 root 密码；建一个练习用的库 `chat_db`
+- [x ] 安装 MySQL C++ 客户端开发包：`sudo apt install libmysqlclient-dev`（或 mariadb-connector）
+- [ x] 安装 Redis：`sudo apt install redis-server`；`redis-cli ping` 返回 PONG
+- [ x] 安装 hiredis：`sudo apt install libhiredis-dev`
 - [ ] 安装可视化客户端（可选但强烈推荐）：Windows 上装 **DBeaver**（MySQL）和 **Another Redis Desktop Manager**（Redis），方便看数据
-- [ ] 在 `cpp-advanced-month2/scripts/check_env.sh` 写一个脚本，自动检查上面所有项
+- [x] 在 `cpp-advanced-month2/scripts/check_env.sh` 写一个脚本，自动检查上面所有项
 
 ---
 
