@@ -1,0 +1,80 @@
+---
+description: 学习进度同步规则：新会话必读 PROGRESS.md，完成任务必写回
+alwaysApply: true
+---
+
+# 学习进度同步规则（progress-sync）
+
+本仓库是用户的 C++ 三个月进阶学习仓库。为了让**不同会话之间**能无缝接力，每次对话必须按本规则操作。
+
+## 🟢 会话开始时（必须执行，不可跳过）
+
+1. **读取 `PROGRESS.md`**：这是仓库的"单一进度真相源"。读完后能回答：
+   - 现在是第几个月、第几周、Day几
+   - 上次完成的是哪个 day（标签 + 日期 + commit）
+   - 下一个待办任务是什么
+   - 是否有未解决的阻塞 / 备忘
+2. **对照系统当前日期**（来自 `Today's date` 字段或 `Get-Date`）：判断是否有逾期 day。逾期 ≥ 1 天必须在晨会汇报里点出。
+3. **晨会汇报格式**（沿用 `leader-supervisor.mdc` 的格式，但必须额外包含从 PROGRESS.md 读到的"上次完成"和"下一个待办"两行）：
+   ```
+   📅 [日期 / 星期]
+   ✅ 上次完成：[从 PROGRESS.md 读]
+   🔥 当前重点：[当前周主题]
+   📌 下一个待办：[从 PROGRESS.md 读，含 day 编号]
+   ⚠️ 注意事项：[逾期 / 阻塞，没有就写"无"]
+   ```
+
+## 🟢 完成一个 day 任务时（用户报告完成 / 你帮 commit 后）
+
+必须**主动**更新 `PROGRESS.md`，顺序如下：
+
+1. 先确认 git 已 commit（未 commit ≠ 完成，严格按 `leader-supervisor.mdc` 第 4 条优先级判断）
+2. 取 commit short hash（`git log -1 --format=%h`）
+3. 用 `StrReplace` 修改 `PROGRESS.md`：
+   - 在"📝 最近 5 次完成记录"顶部**插入新行**（保留下方旧记录，最多保留 5 条，多余的删掉）
+     - 格式：`YYYY-MM-DD | day{N} | <主题简述 20 字内> | <commit short hash>`
+   - 修改 YAML frontmatter：
+     - `last_completed_day` ← N
+     - `current_day` ← N+1（如果是当周最后一天则为 N，并把 status 改成 week_done）
+     - `last_update` ← 今天日期
+     - `next_task` ← 下一个 day 的标题
+   - 更新"📋 month2 周进度"表里 `完成 day` 计数（如 `0/7` → `1/7`）
+   - 更新"🎯 当前状态"表里的 day 编号和下一个待办
+4. 把 `PROGRESS.md` 一起 commit：
+   ```
+   docs(progress): day{N} done, next day{N+1}
+   ```
+
+## 🟢 完成一周时（写完 WEEKx_SUMMARY）
+
+额外动作：
+1. 把"📋 month2 周进度"对应周状态从 🔥 改 ✅，下一周改 🔥
+2. frontmatter `week` 字段 +1（如 1 → 2），`current_day` 重置到下周第一天
+3. "📅 接下来 3 天预告"表整体替换为下周前 3 天
+
+## 🟢 完成一整月时
+
+1. "📊 三个月总览"对应月份状态改 ✅
+2. frontmatter `month` 字段 +1
+3. 把当前月所有"最近完成记录"清空（归档进对应月份的 README），重置为下月 Day1 待开工状态
+
+## 🛑 严禁行为
+
+- ❌ 不能在用户没 commit 的情况下把 `PROGRESS.md` 标记为"完成"
+- ❌ 不能跳过晨会汇报直接干活
+- ❌ 不能让"📝 最近 5 次完成记录"超过 5 条（多了归档到月份 README）
+- ❌ 不能在 PROGRESS.md 里写大段学习内容 / 知识点（那是 WEEKx_SUMMARY 的事）
+
+## 📂 文件清单与职责
+
+| 文件 | 职责 | 谁读 | 谁写 |
+|---|---|---|---|
+| `PROGRESS.md` | 单一进度真相源（轻量、机器+人类可读） | 每个新会话开始必读 | 完成任务时主动更新 |
+| `cpp-advanced-monthX/README.md` | 月级长期计划（不变） | 立项时一次性读 | 月度收官时改进度表 |
+| `cpp-advanced-monthX/weekY/WEEKy_PLAN.md` | 周级 day 任务卡（含 DoD） | 每周开工时读 | 每天填"学习记录区" |
+| `cpp-advanced-monthX/weekY/WEEKy_SUMMARY.md` | 周末复盘（含面试题） | 复盘时写 | 周日写 |
+| `cpp-advanced-monthX/INTERVIEW_NOTES.md` | 累积面试题 | 月末整理 | 每周日追加 ≥ 5 条 |
+
+---
+
+**核心一句话**：PROGRESS.md 是会话间的"接力棒"，新会话读它知道在哪里，旧会话结束前写它告诉下一个会话。
