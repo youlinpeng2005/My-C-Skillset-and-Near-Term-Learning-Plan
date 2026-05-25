@@ -1,11 +1,11 @@
 ---
 month: 2
 week: 1
-current_day: 1
-last_completed_day: 0
+current_day: 2
+last_completed_day: 1
 last_update: 2026-05-25
-status: not_started_today
-next_task: "Day1 — SQL 复习 + chat_db schema 设计"
+status: in_progress
+next_task: "Day2 — 索引原理 + B+ 树 + 给 users/messages 表加索引"
 plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 ---
 
@@ -25,9 +25,9 @@ plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 |---|---|
 | 当前月份 | **month2**（MySQL + Redis + chat_server 重构） |
 | 当前周 | **Week1 — MySQL 工程化**（5/25 ~ 5/31） |
-| 当前 day | **Day1**（2026/05/25 周一） |
-| 上次完成的 day | — （month2 刚开工，month1 已收官） |
-| 下一个待办 | Day1 — SQL 复习 + chat_db schema 设计 |
+| 当前 day | **Day2**（2026/05/26 周二） |
+| 上次完成的 day | Day1（2026/05/25，commit c35358a） |
+| 下一个待办 | Day2 — 索引原理 + B+ 树 + 给 users/messages 表加索引 |
 | 详细任务卡 | [`cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md`](cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md) |
 | 当前阻塞 | 无 |
 
@@ -47,7 +47,7 @@ plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 
 | 周 | 时间 | 主题 | 完成 day | 状态 |
 |---|---|---|---|---|
-| Week1 | 5/25 ~ 5/31 | MySQL 工程化 + 连接池 | 0 / 7 | 🔥 进行中 |
+| Week1 | 5/25 ~ 5/31 | MySQL 工程化 + 连接池 | 1 / 7 | 🔥 进行中 |
 | Week2 | 6/01 ~ 6/07 | Redis 入门 + hiredis 封装 | 0 / 7 | ⏳ 待开始 |
 | Week3 | 6/08 ~ 6/14 | chat_server 重构 + 登录注册 | 0 / 7 | ⏳ 待开始 |
 | Week4 | 6/15 ~ 6/21 | 完整集成 + 日志增强 + 压测 | 0 / 7 | ⏳ 待开始 |
@@ -58,7 +58,7 @@ plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 
 > 倒序排列，最新的在最上面。每条格式：`YYYY-MM-DD | 标签 | 简述 | commit hash`
 
-- 2026-05-25 | (待填) | (待填) | (待填)
+- 2026-05-25 | day1 | chat_db 建库建表 3 张，schema 设计说明 | c35358a
 
 ---
 
