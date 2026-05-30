@@ -1,11 +1,11 @@
 ---
 month: 2
 week: 1
-current_day: 6
-last_completed_day: 5
-last_update: 2026-05-28
+current_day: 7
+last_completed_day: 6
+last_update: 2026-05-30
 status: in_progress
-next_task: "Day6 — 手写 MySQL 连接池"
+next_task: "Day7 — Buffer 日 + WEEK1_SUMMARY"
 plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 ---
 
@@ -25,9 +25,9 @@ plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 |---|---|
 | 当前月份 | **month2**（MySQL + Redis + chat_server 重构） |
 | 当前周 | **Week1 — MySQL 工程化**（5/25 ~ 5/31） |
-| 当前 day | **Day6**（2026/05/30 周六） |
-| 上次完成的 day | Day5（2026/05/28，commit 2bd1a5e） |
-| 下一个待办 | Day6 — 手写 MySQL 连接池 |
+| 当前 day | **Day7**（2026/05/31 周日） |
+| 上次完成的 day | Day6（2026/05/30，commit ce70df8） |
+| 下一个待办 | Day7 — Buffer 日 + WEEK1_SUMMARY |
 | 详细任务卡 | [`cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md`](cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md) |
 | 当前阻塞 | 无 |
 
@@ -47,7 +47,7 @@ plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 
 | 周 | 时间 | 主题 | 完成 day | 状态 |
 |---|---|---|---|---|
-| Week1 | 5/25 ~ 5/31 | MySQL 工程化 + 连接池 | 5 / 7 | 🔥 进行中 |
+| Week1 | 5/25 ~ 5/31 | MySQL 工程化 + 连接池 | 6 / 7 | 🔥 进行中 |
 | Week2 | 6/01 ~ 6/07 | Redis 入门 + hiredis 封装 | 0 / 7 | ⏳ 待开始 |
 | Week3 | 6/08 ~ 6/14 | chat_server 重构 + 登录注册 | 0 / 7 | ⏳ 待开始 |
 | Week4 | 6/15 ~ 6/21 | 完整集成 + 日志增强 + 压测 | 0 / 7 | ⏳ 待开始 |
@@ -58,11 +58,11 @@ plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 
 > 倒序排列，最新的在最上面。每条格式：`YYYY-MM-DD | 标签 | 简述 | commit hash`
 
+- 2026-05-30 | day6 | 手写 MySQL 连接池，100线程压测通过 | ce70df8
 - 2026-05-28 | day5 | C++ 接入 MySQL，RAII Connection + CRUD | 2bd1a5e
 - 2026-05-26 | day4 | 事务四种隔离级别实验 + MVCC 原理笔记 | 83c15d5
 - 2026-05-26 | day3 | EXPLAIN 实战 + 10w 数据生成 + 慢查询日志 | b29b0e5
 - 2026-05-25 | day2 | 索引原理 + B+树 + 聚簇/非聚簇索引笔记 | 4446a23
-- 2026-05-25 | day1 | chat_db 建库建表 3 张，schema 设计说明 | c35358a
 
 ---
 
@@ -90,9 +90,9 @@ plan_file: "cpp-advanced-month2/week1_mysql/WEEK1_PLAN.md"
 
 | 日期 | 计划 |
 |---|---|
-| 2026-05-25 周一 | Day1：建 chat_db + 设计 3 张表 schema |
-| 2026-05-26 周二 | Day2：索引原理 + 给 users / messages 表加索引 |
-| 2026-05-27 周三 | Day3：往 messages 插 10w 假数据 + EXPLAIN 实战 |
+| 2026-05-31 周日 | Day7：Buffer 日 + 写 WEEK1_SUMMARY |
+| 2026-06-01 周一 | Week2 Day1：Redis 入门 + hiredis 安装 |
+| 2026-06-02 周二 | Week2 Day2：Redis 数据结构实战 |
 
 ---
 
