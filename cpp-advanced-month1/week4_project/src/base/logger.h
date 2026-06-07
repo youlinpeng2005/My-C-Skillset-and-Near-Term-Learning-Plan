@@ -134,11 +134,3 @@ inline AsyncLogger& get_logger() {
 #define LOG_INFO(msg)  get_logger().log(LogLevel::INFO,  msg, __FILE__, __LINE__)
 #define LOG_WARN(msg)  get_logger().log(LogLevel::WARN,  msg, __FILE__, __LINE__)
 #define LOG_ERROR(msg) get_logger().log(LogLevel::ERROR, msg, __FILE__, __LINE__)
-
-int main() {
-    auto& logger = get_logger();
-    LOG_INFO("hello from logger");
-    LOG_WARN("this is a warning");
-    LOG_ERROR("simulated error");
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // 等待日志写完
-}

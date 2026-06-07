@@ -24,6 +24,7 @@
 #include "../base/logger.h"
 #include "../base/thread_pool.h"
 #include "../net/protocol.h"
+#include "day6_conn_pool.h"
 
 using Clock = std::chrono::steady_clock;
 using TimePoint = Clock::time_point;
@@ -37,14 +38,14 @@ static const int HEARTBEAT_TIMEOUT_SEC = 30; // 30秒无心跳断开
 // 连接信息
 // ============================================================
 
-struct Connection {
+struct ClientConn {
     int fd;
     std::string ip;
     std::string nickname;
     TimePoint last_active;   // 最后活跃时间（心跳检测用）
     PacketParser parser;     // 每个连接有自己的粘包处理器
 
-    explicit Connection(int fd, const std::string& ip)
+    explicit ClientConn(int fd, const std::string& ip)
         : fd(fd), ip(ip),
           nickname("用户" + std::to_string(fd)),
           last_active(Clock::now()) {}
@@ -62,6 +63,22 @@ public:
         epfd_ = epoll_create1(0);
         listenfd_ = create_listen_socket(port);
         epoll_add(listenfd_, EPOLLIN);
+
+        // 初始化 MySQL 连接池（为 Week3 登录/注册重构铺路）
+        // 密码通过环境变量 CHAT_DB_PASS 传入，避免硬编码
+        ConnectionPool::Config db_cfg;
+        db_cfg.host      = "127.0.0.1";
+        db_cfg.user      = "root";
+        db_cfg.password  = getenv("CHAT_DB_PASS") ? getenv("CHAT_DB_PASS") : "";
+        db_cfg.db        = "chat_db";
+        db_cfg.pool_size = static_cast<int>(std::thread::hardware_concurrency()) * 2 + 1;
+
+        try {
+            db_pool_ = std::make_unique<ConnectionPool>(db_cfg);
+            LOG_INFO("MySQL 连接池已初始化，size=" + std::to_string(db_cfg.pool_size));
+        } catch (const std::exception& e) {
+            LOG_WARN(std::string("MySQL 连接池初始化失败，降级运行（无持久化）: ") + e.what());
+        }
 
         LOG_INFO("服务器启动，端口=" + std::to_string(port)
                  + "，工作线程=" + std::to_string(num_workers));
@@ -129,7 +146,7 @@ private:
         std::string ip = inet_ntoa(client_addr.sin_addr);
         {
             std::lock_guard<std::mutex> lock(conns_mutex_);
-            conns_[connfd] = std::make_shared<Connection>(connfd, ip);
+            conns_[connfd] = std::make_shared<ClientConn>(connfd, ip);
         }
 
         LOG_INFO("新连接 fd=" + std::to_string(connfd) + " ip=" + ip);
@@ -194,15 +211,44 @@ private:
             }
 
             case MsgType::LOGIN:
-                // 设置昵称
+                // 优先查数据库获取昵称；连接池不可用时降级为用 payload 直接做昵称
                 {
-                    std::lock_guard<std::mutex> lock(conns_mutex_);
-                    auto it = conns_.find(fd);
-                    if (it != conns_.end()) {
-                        it->second->nickname = msg.payload;
+                    std::string username = msg.payload;
+                    std::string display_name = username;  // 默认值
+
+                    if (db_pool_) {
+                        try {
+                            auto guard = db_pool_->acquire();
+                            MYSQL* mysql = guard->raw();
+
+                            // 用 prepared statement 防 SQL 注入
+                            std::string query =
+                                "SELECT nickname FROM users WHERE username='" + username + "' LIMIT 1";
+                            if (mysql_query(mysql, query.c_str()) == 0) {
+                                MYSQL_RES* res = mysql_store_result(mysql);
+                                if (res) {
+                                    MYSQL_ROW row = mysql_fetch_row(res);
+                                    if (row && row[0]) display_name = row[0];
+                                    mysql_free_result(res);
+                                    LOG_INFO("DB 查询用户: username=" + username
+                                             + " nickname=" + display_name);
+                                }
+                            } else {
+                                LOG_WARN("DB 查询失败: " + std::string(mysql_error(mysql)));
+                            }
+                            // guard 析构 → 连接自动归还连接池
+                        } catch (const std::exception& e) {
+                            LOG_WARN(std::string("acquire 连接失败: ") + e.what());
+                        }
                     }
+
+                    {
+                        std::lock_guard<std::mutex> lock(conns_mutex_);
+                        auto it = conns_.find(fd);
+                        if (it != conns_.end()) it->second->nickname = display_name;
+                    }
+                    LOG_INFO("fd=" + std::to_string(fd) + " 登录为: " + display_name);
                 }
-                LOG_INFO("fd=" + std::to_string(fd) + " 设置昵称: " + msg.payload);
                 break;
 
             default:
@@ -292,8 +338,10 @@ private:
     ThreadPool pool_;
     std::atomic<bool> running_;
 
+    std::unique_ptr<ConnectionPool> db_pool_;   // MySQL 连接池（nullptr = 降级模式）
+
     std::mutex conns_mutex_;
-    std::unordered_map<int, std::shared_ptr<Connection>> conns_;
+    std::unordered_map<int, std::shared_ptr<ClientConn>> conns_;
 };
 
 // 信号处理
